@@ -1,4 +1,4 @@
-add_files -norecurse src/node.v
-add_files -norecurse src/node_async_valid.v
-add_files -norecurse src/node_async_ready.v
-add_files -norecurse src/node_async_validready.v
+add_files -norecurse src/node.sv
+add_files -norecurse src/node_async_valid.sv
+add_files -norecurse src/node_async_ready.sv
+add_files -norecurse src/node_async_validready.sv

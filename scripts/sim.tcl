@@ -14,7 +14,7 @@ set sources_file scripts/${project_name}.tcl
 update_compile_order -fileset sources_1
 
 # Add simulation file
-add_files -fileset sim_1 -norecurse sim/${testbench_name}.v
+add_files -fileset sim_1 -norecurse sim/${testbench_name}.sv
 
 set_property top ${testbench_name} [get_filesets sim_1]
 update_compile_order -fileset sim_1

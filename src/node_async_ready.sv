@@ -1,4 +1,4 @@
-module node #(
+module node_async_ready #(
     parameter WIDTH=32
 ) (
     input                      clk, 

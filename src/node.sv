@@ -20,7 +20,7 @@ module node #(
     assign down_fire = ready_down_in & valid_down_out;// handshake of this node to downstream fired, logic as a master/transmitter
 
     assign ready_up_out   = ready_down_in;// for actual usage, ready_out = ready_in & pending, pending is a logic dependent on nodes specific design
-    assign valid_down_out = valid_down_in;// for actual usage, valid_out = valid_in & pending, pending is a logic dependent on nodes specific design
+    assign valid_down_out = valid_up_in;// for actual usage, valid_out = valid_in & pending, pending is a logic dependent on nodes specific design
 
     // internal mem node
     always_ff @(posedge clk or negedge rst_n) begin

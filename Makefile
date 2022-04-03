@@ -1,6 +1,6 @@
 proj = handshake
 tb = testbench
-VERILOG_SRCS = src/*.v
+VERILOG_SRCS = src/*.sv
 
 .PHONY: build-project
 $(vivado_proj_file) build-project: $(VERILOG_SRCS)
