@@ -16,41 +16,33 @@ module node_async_validready #(
     logic [WIDTH-1 : 0] data_reg, data_in_buf, data_out_buf;
 
     // comb logic
-    assign up_fire   = ready_up_out   & valid_up_buf;   // handshake of upstream into this node fired, logic as a slave/receiver
-    assign down_fire = ready_down_buf & valid_down_out;// handshake of this node to downstream fired, logic as a master/transmitter
-    assign ready_up_out   = ready_down_buf;
-    assign valid_down_out = valid_up_buf;
+    assign up_fire   = ready_up_out_buf  & valid_up_in_buf;// handshake of upstream into this node fired, logic as a slave/receiver
+    assign down_fire = ready_down_in_buf & valid_down_out_buf; // handshake of this node to downstream fired, logic as a master/transmitter
+    
+    assign ready_up_out   = ready_down_in_buf;
+    assign valid_down_out = valid_up_in_buf;
 
-    // assume ready&valid input are async, buffer it a cycle
+    assign data_out = data_reg;
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            ready_down_buf   <= 0;
-            valid_up_buf     <= 0;
+            valid_up_in_buf    <= 0;
+            ready_up_out_buf   <= 0;
+            ready_down_in_buf  <= 0;
+            valid_down_out_buf <= 0;
         end else begin 
-            ready_down_buf   <= ready_down_in;
-            valid_up_buf     <= valid_up_in;
+            valid_up_in_buf    <= valid_up_in;
+            ready_up_out_buf   <= ready_up_out;
+            ready_down_in_buf  <= ready_down_in;
+            valid_down_out_buf <= valid_down_out;
         end
     end
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            data_in_buf   <= 0;
-            data_out_buf  <= 0;
+            data_reg <= 0;
         end else begin 
-            data_in_buf   <= data_in;
-            data_out_buf  <= data_reg;
-        end
-    end
-
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            data_reg  <= 0;
-            data_out  <= 0;
-        end else begin 
-            if (up_fire)
-                data_reg  <= data_in_buf;
-            if (down_fire)
-                data_out  <= data_out_buf;
+            data_reg <= data_in;
         end
     end
 
