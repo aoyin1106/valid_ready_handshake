@@ -7,8 +7,8 @@ module node_async_ready #(
     input                 up_valid_in,     // from upstream node
     output                up_ready_out,    // to upstream node
 
-    output  [WIDTH-1 : 0] data_out,
-    output                dn_valid_out,    // to downstream node
+    output logic [WIDTH-1 : 0] data_out,
+    output logic               dn_valid_out,    // to downstream node
     input                 dn_ready_in      // from downstream node
 );
     // internal logic
@@ -20,19 +20,18 @@ module node_async_ready #(
     assign up_fire = up_ready_out & up_valid_in;  // handshake of upstream into this node fired, logic as a slave/receiver
     assign dn_fire = dn_ready_in  & dn_valid_out; // handshake of this node to downstream fired, logic as a master/transmitter
 
-    assign up_ready_out = dn_ready_in_buf | (!dn_valid_out);      // for actual usage, ready_out = ready_in & pending, pending is a logic dependent on nodes specific design
+    assign up_ready_out = dn_ready_in_buf;      // for actual usage, ready_out = ready_in & pending, pending is a logic dependent on nodes specific design
 
     always_comb begin
+        // normal case, direct pass through
+        dn_valid_out = up_valid_in;
+        data_out     = data_in;
         // special case: new ready low while old ready high
         // need to use the buffer as output 
-        if (up_ready_out & !dn_ready_in) begin 
+        if (!up_ready_out) begin 
             dn_valid_out = up_valid_in_buf;
             data_out     = data_in_buf;
-        end else begin
-        // normal case, direct pass through
-            dn_valid_out = up_valid_in_buf;
-            data_out     = data_in_buf;
-        end
+        end 
     end
 
     // input ready buffer
@@ -46,12 +45,12 @@ module node_async_ready #(
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            data_in_buf      <= 0;
             up_valid_in_buf  <= 0;
+            data_in_buf      <= 0;
         end else begin
             if (up_ready_out) begin
-                data_un_buf      <= data_in;
-                up_valid_in_buf  <= up_valid_in;
+                up_valid_in_buf <= up_valid_in;
+                data_in_buf     <= data_in;
             end
         end
     end
