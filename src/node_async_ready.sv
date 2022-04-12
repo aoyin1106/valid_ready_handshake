@@ -1,37 +1,58 @@
 module node_async_ready #(
     parameter WIDTH=32
 ) (
-    input                      clk, 
-    input                      rst_n,
-    input        [WIDTH-1 : 0] data_in,
-    input                      valid_up_in,   // from upstream node
-    input                      ready_down_in, // from downstream node
+    input                 clk, 
+    input                 rst_n,
+    input   [WIDTH-1 : 0] data_in,
+    input                 up_valid_in,     // from upstream node
+    output                up_ready_out,    // to upstream node
 
-    output logic [WIDTH-1 : 0] data_out,
-    output logic               valid_down_out, // to downstream node
-    output logic               ready_up_out    // to upstream node
+    output  [WIDTH-1 : 0] data_out,
+    output                dn_valid_out,    // to downstream node
+    input                 dn_ready_in      // from downstream node
 );
     // internal logic
-    wire up_fire, down_fire;
-    logic valid_up_buf, ready_down_buf;
-    logic [WIDTH-1 : 0] data_buf;
+    wire up_fire, dn_fire;
+    logic dn_ready_in_buf, up_valid_in_buf;
+    logic [WIDTH-1 : 0] data_in_buf;
 
     // comb logic
-    assign up_fire   = ready_up_out      & valid_up_in;        // handshake of upstream into this node fired, logic as a slave/receiver
-    assign down_fire = ready_down_in_buf & valid_down_out_buf; // handshake of this node to downstream fired, logic as a master/transmitter
+    assign up_fire = up_ready_out & up_valid_in;  // handshake of upstream into this node fired, logic as a slave/receiver
+    assign dn_fire = dn_ready_in  & dn_valid_out; // handshake of this node to downstream fired, logic as a master/transmitter
 
-    assign ready_up_out   = ready_down_out_buf; // for actual usage, ready_out = ready_in & pending, pending is a logic dependent on nodes specific design
-    assign valid_down_out = valid_up_in;        // for actual usage, valid_out = valid_in & pending, pending is a logic dependent on nodes specific design
+    assign up_ready_out = dn_ready_in_buf | (!dn_valid_out);      // for actual usage, ready_out = ready_in & pending, pending is a logic dependent on nodes specific design
 
-    assign data_out = data_in;
+    always_comb begin
+        // special case: new ready low while old ready high
+        // need to use the buffer as output 
+        if (up_ready_out & !dn_ready_in) begin 
+            dn_valid_out = up_valid_in_buf;
+            data_out     = data_in_buf;
+        end else begin
+        // normal case, direct pass through
+            dn_valid_out = up_valid_in_buf;
+            data_out     = data_in_buf;
+        end
+    end
+
+    // input ready buffer
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            dn_ready_in_buf <= 0;
+        end else begin 
+            dn_ready_in_buf <= dn_ready_in;
+        end
+    end
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            ready_down_in_buf  <= 0;
-            valid_down_out_buf <= 0;
-        end else begin 
-            ready_down_in_buf  <= ready_down_in;
-            valid_down_out_buf <= valid_down_out;
+            data_in_buf      <= 0;
+            up_valid_in_buf  <= 0;
+        end else begin
+            if (up_ready_out) begin
+                data_un_buf      <= data_in;
+                up_valid_in_buf  <= up_valid_in;
+            end
         end
     end
 
