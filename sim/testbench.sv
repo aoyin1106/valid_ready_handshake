@@ -22,8 +22,8 @@ module testbench;
 
     //node#(.WIDTH(WIDTH)) master(
     //node_async_valid#(.WIDTH(WIDTH)) master(
-    node_async_ready#(.WIDTH(WIDTH)) master(
-    //node_async_validready#(.WIDTH(WIDTH)) master(
+    //node_async_ready#(.WIDTH(WIDTH)) master(
+    node_async_validready#(.WIDTH(WIDTH)) master(
                             //input 
                             .clk(clk), 
                             .rst_n(rst_n),
@@ -38,8 +38,8 @@ module testbench;
 
     //node#(.WIDTH(WIDTH)) slave(
     //node_async_valid#(.WIDTH(WIDTH)) slave(
-    node_async_ready#(.WIDTH(WIDTH)) slave(
-    //node_async_validready#(.WIDTH(WIDTH)) slave(
+    //node_async_ready#(.WIDTH(WIDTH)) slave(
+    node_async_validready#(.WIDTH(WIDTH)) slave(
                             //input 
                             .clk(clk), 
                             .rst_n(rst_n),
